@@ -3,19 +3,21 @@ import Loading from "./Loading";
 import * as Location from "expo-location";
 import {Alert} from "react-native";
 import axios from 'axios';
+import Weather from "./Weather";
 
 const API_KEY = 'ddf2925131fef332803468f3f3bbf31e';
 
 export default class extends React.Component {
   state = {
-    isLoading: true
+    isLoading: true,
+    temp: 0
   };
 
-
-
   getWeather = async( latitude, longitude ) => {
-    const { data } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`);
+    const { data } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric`);
     console.log("weather data : ", data);
+
+    this.setState( {isLoading: false, temp: data.main.temp });
   };
 
   getLocation = async () => {
@@ -25,7 +27,7 @@ export default class extends React.Component {
       console.log("coords : ", latitude, longitude);
 
       this.getWeather(latitude, longitude);
-      this.setState( {isLoading: false});
+
     }catch (e) {
       Alert.alert("Can't find you.", "So sad");
     }
@@ -36,7 +38,7 @@ export default class extends React.Component {
   }
 
   render() {
-    const { isLoading } = this.state;
-    return isLoading ? <Loading/> : null;
+    const { isLoading, temp } = this.state;
+    return isLoading ? <Loading/> : <Weather temp={ Math.round(temp) } />;
   }
 }
